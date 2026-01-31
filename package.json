@@ -1,0 +1,20 @@
+{
+  "name": "n8n-nodes-stepfun-asr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "n8n custom node: StepFun ASR (speech-to-text)",
+  "license": "UNLICENSED",
+  "scripts": {
+    "n8n-node-dev": "node ./scripts/n8n-node-dev.cjs",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "new": "npm run n8n-node-dev -- new"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "n8n-core": "1.122.12",
+    "n8n-node-dev": "1.121.10",
+    "n8n-workflow": "1.120.7",
+    "typescript": "^5.9.3"
+  }
+}

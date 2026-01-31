@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/n8n-node-dev/src/tsconfig-build.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "lib": ["es2022", "dom"],
+    "target": "es2022"
+  },
+  "include": ["credentials/**/*.credentials.ts", "nodes/**/*.node.ts"]
+}
