@@ -11,7 +11,6 @@ import type {
 import { NodeApiError } from 'n8n-workflow';
 
 type StepFunApiCredentials = {
-  apiKey: string;
   baseUrl: string;
 };
 
@@ -22,6 +21,24 @@ export class StepFunAsr implements INodeType {
     group: ['transform'],
     version: 1,
     description: 'Speech-to-text via StepFun',
+    subtitle: '={{$parameter["model"]}}',
+    documentationUrl: 'https://platform.stepfun.com/',
+    icon: 'file:stepfun.svg',
+    codex: {
+      categories: ['AI', 'Audio'],
+      subcategories: {
+        AI: ['Speech Recognition'],
+        Audio: ['Transcription'],
+      },
+      resources: {
+        primaryDocumentation: [
+          {
+            url: 'https://platform.stepfun.com/',
+          },
+        ],
+      },
+      alias: ['asr', 'speech to text', 'speech-to-text', 'transcribe', 'transcription', 'stt'],
+    },
     defaults: {
       name: 'StepFun ASR',
     },
@@ -164,14 +181,11 @@ export class StepFunAsr implements INodeType {
           method: 'POST',
           url,
           body: form,
-          headers: {
-            Authorization: `Bearer ${credentials.apiKey}`,
-          },
           encoding: responseFormat === 'json' || responseFormat === 'verbose_json' ? 'json' : 'text',
           json: responseFormat === 'json' || responseFormat === 'verbose_json',
         };
 
-        const response = await this.helpers.httpRequest(requestOptions);
+        const response = await this.helpers.httpRequestWithAuthentication.call(this, 'stepFunApi', requestOptions);
 
         const json: IDataObject =
           typeof response === 'string'

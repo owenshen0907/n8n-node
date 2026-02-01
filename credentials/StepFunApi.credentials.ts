@@ -3,12 +3,15 @@ import type {
   ICredentialTestRequest,
   ICredentialType,
   INodeProperties,
+  Icon,
 } from 'n8n-workflow';
 
 export class StepFunApi implements ICredentialType {
   name = 'stepFunApi';
   displayName = 'StepFun API';
   documentationUrl = 'https://platform.stepfun.com/';
+  icon: Icon = 'file:stepfun.svg';
+  supportedNodes = ['stepFunAsr', 'stepFunTts'];
 
   authenticate: IAuthenticateGeneric = {
     type: 'generic',

@@ -4,11 +4,19 @@
   "private": true,
   "description": "n8n custom node: StepFun ASR (speech-to-text)",
   "license": "UNLICENSED",
+  "homepage": "https://platform.stepfun.com/",
   "scripts": {
     "n8n-node-dev": "node ./scripts/n8n-node-dev.cjs",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node ./scripts/copy-assets.cjs",
     "build:watch": "tsc -p tsconfig.json --watch",
     "new": "npm run n8n-node-dev -- new"
+  },
+  "n8n": {
+    "nodes": [
+      "dist/nodes/StepFunAsr/StepFunAsr.node.js",
+      "dist/nodes/StepFunTts/StepFunTts.node.js"
+    ],
+    "credentials": ["dist/credentials/StepFunApi.credentials.js"]
   },
   "devDependencies": {
     "@types/node": "^25.1.0",

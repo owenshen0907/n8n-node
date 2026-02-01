@@ -1,0 +1,52 @@
+{
+  "name": "StepFun ASR - Basic",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c4d1ad30-3c2b-4c6a-9a0f-2b01a9d2d101",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "audioSource": "url",
+        "audioUrl": "https://example.com/audio.mp3",
+        "model": "step-asr-mini",
+        "responseFormat": "json"
+      },
+      "id": "c4d1ad30-3c2b-4c6a-9a0f-2b01a9d2d102",
+      "name": "StepFun ASR",
+      "type": "stepFunAsr",
+      "typeVersion": 1,
+      "position": [520, 300],
+      "credentials": {
+        "stepFunApi": {
+          "id": "REPLACE_ME",
+          "name": "StepFun API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "StepFun ASR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetup": "Create StepFun API credentials then replace the credential reference."
+  }
+}
+
