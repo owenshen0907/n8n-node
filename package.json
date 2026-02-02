@@ -1,8 +1,8 @@
 {
-  "name": "n8n-nodes-stepfun-asr",
+  "name": "n8n-nodes-stepfun",
   "version": "0.1.0",
   "private": true,
-  "description": "n8n custom node: StepFun ASR (speech-to-text)",
+  "description": "n8n community node: Stepfun.ai TTS (text-to-speech)",
   "license": "UNLICENSED",
   "homepage": "https://platform.stepfun.com/",
   "scripts": {
@@ -13,7 +13,6 @@
   },
   "n8n": {
     "nodes": [
-      "dist/nodes/StepFunAsr/StepFunAsr.node.js",
       "dist/nodes/StepFunTts/StepFunTts.node.js"
     ],
     "credentials": ["dist/credentials/StepFunApi.credentials.js"]

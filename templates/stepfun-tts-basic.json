@@ -1,5 +1,5 @@
 {
-  "name": "StepFun TTS - Basic",
+  "name": "Stepfun.ai TTS - Basic",
   "nodes": [
     {
       "parameters": {},
@@ -11,21 +11,20 @@
     },
     {
       "parameters": {
-        "text": "Hello from StepFun TTS",
-        "model": "step-tts-mini",
-        "responseMimeType": "audio/mpeg",
-        "binaryPropertyName": "audio",
-        "fileName": "stepfun-tts"
+        "text": "Hello from Stepfun.ai TTS",
+        "voice": "",
+        "model": "step-tts-2",
+        "outputFormat": "mp3"
       },
       "id": "b4d1ad30-3c2b-4c6a-9a0f-2b01a9d2d002",
-      "name": "StepFun TTS",
+      "name": "Convert Text Into Speech",
       "type": "stepFunTts",
       "typeVersion": 1,
       "position": [520, 300],
       "credentials": {
         "stepFunApi": {
           "id": "REPLACE_ME",
-          "name": "StepFun API"
+          "name": "Stepfun AI API Key"
         }
       }
     }
@@ -35,7 +34,7 @@
       "main": [
         [
           {
-            "node": "StepFun TTS",
+            "node": "Convert Text Into Speech",
             "type": "main",
             "index": 0
           }
@@ -47,7 +46,6 @@
   "settings": {},
   "versionId": "00000000-0000-0000-0000-000000000000",
   "meta": {
-    "templateCredsSetup": "Create StepFun API credentials then replace the credential reference."
+    "templateCredsSetup": "Create Stepfun AI API Key credentials then replace the credential reference."
   }
 }
-

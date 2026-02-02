@@ -8,10 +8,10 @@ import type {
 
 export class StepFunApi implements ICredentialType {
   name = 'stepFunApi';
-  displayName = 'StepFun API';
-  documentationUrl = 'https://platform.stepfun.com/';
+  displayName = 'Stepfun AI API Key';
+  documentationUrl = 'https://platform.stepfun.ai/';
   icon: Icon = 'file:stepfun.svg';
-  supportedNodes = ['stepFunAsr', 'stepFunTts'];
+  supportedNodes = ['stepFunTts'];
 
   authenticate: IAuthenticateGeneric = {
     type: 'generic',
@@ -31,13 +31,6 @@ export class StepFunApi implements ICredentialType {
 
   properties: INodeProperties[] = [
     {
-      displayName: 'Base URL',
-      name: 'baseUrl',
-      type: 'string',
-      default: 'https://api.stepfun.com/v1',
-      required: true,
-    },
-    {
       displayName: 'API Key',
       name: 'apiKey',
       type: 'string',
@@ -46,6 +39,15 @@ export class StepFunApi implements ICredentialType {
       typeOptions: {
         password: true,
       },
+      description:
+        'Your Stepfun.ai API Key. You can find your API Key at https://platform.stepfun.ai/interface-key',
+    },
+    {
+      displayName: 'Base URL',
+      name: 'baseUrl',
+      type: 'string',
+      default: 'https://api.stepfun.com/v1',
+      required: true,
     },
   ];
 }

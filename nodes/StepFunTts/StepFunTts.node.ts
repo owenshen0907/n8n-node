@@ -1,34 +1,34 @@
-import type { IExecuteFunctions } from 'n8n-workflow';
 import type {
   IDataObject,
+  IExecuteFunctions,
   IHttpRequestOptions,
+  ILoadOptionsFunctions,
   INodeExecutionData,
+  INodePropertyOptions,
   INodeType,
   INodeTypeDescription,
   JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
-function getFileExtensionFromMimeType(mimeType: string): string | undefined {
-  if (!mimeType) return undefined;
-  const normalized = mimeType.toLowerCase().trim();
-  if (normalized === 'audio/mpeg' || normalized === 'audio/mp3') return 'mp3';
-  if (normalized === 'audio/wav' || normalized === 'audio/wave') return 'wav';
-  if (normalized === 'audio/ogg') return 'ogg';
-  if (normalized === 'audio/webm') return 'webm';
-  if (normalized === 'audio/flac') return 'flac';
-  return undefined;
-}
+const OUTPUT_FORMAT_MAP: Record<string, { mimeType: string; ext: string }> = {
+  mp3: { mimeType: 'audio/mpeg', ext: 'mp3' },
+  aac: { mimeType: 'audio/aac', ext: 'aac' },
+  flac: { mimeType: 'audio/flac', ext: 'flac' },
+  wav: { mimeType: 'audio/wav', ext: 'wav' },
+  pcm: { mimeType: 'audio/pcm', ext: 'pcm' },
+  opus: { mimeType: 'audio/opus', ext: 'opus' },
+};
 
 export class StepFunTts implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'StepFun TTS',
+    displayName: 'Stepfun.ai',
     name: 'stepFunTts',
     group: ['transform'],
     version: 1,
-    description: 'Text-to-speech via StepFun',
+    description: 'Convert Text Into Speech using Stepfun.ai\'s Model (TTS)',
     subtitle: '={{$parameter["model"]}}',
-    documentationUrl: 'https://platform.stepfun.com/',
+    documentationUrl: 'https://platform.stepfun.ai/',
     icon: 'file:stepfun.svg',
     codex: {
       categories: ['AI', 'Audio'],
@@ -39,14 +39,14 @@ export class StepFunTts implements INodeType {
       resources: {
         primaryDocumentation: [
           {
-            url: 'https://platform.stepfun.com/',
+            url: 'https://platform.stepfun.ai/',
           },
         ],
       },
-      alias: ['tts', 'text to speech', 'text-to-speech', 'speech synthesis', 'voice'],
+      alias: ['tts', 'text to speech', 'text-to-speech', 'speech synthesis', 'voice', 'stepfun'],
     },
     defaults: {
-      name: 'StepFun TTS',
+      name: 'Convert Text Into Speech',
     },
     inputs: ['main'],
     outputs: ['main'],
@@ -63,90 +63,81 @@ export class StepFunTts implements INodeType {
         type: 'string',
         default: '',
         required: true,
-      },
-      {
-        displayName: 'Endpoint Path',
-        name: 'endpointPath',
-        type: 'string',
-        default: '/audio/speech',
-        required: true,
-      },
-      {
-        displayName: 'Model',
-        name: 'model',
-        type: 'string',
-        default: 'step-tts-mini',
-        required: true,
+        description: 'The text to convert to speech (max 1000 characters)',
+        typeOptions: {
+          rows: 4,
+        },
       },
       {
         displayName: 'Voice',
         name: 'voice',
-        type: 'string',
+        type: 'options',
+        typeOptions: {
+          loadOptionsMethod: 'getVoices',
+        },
         default: '',
-        placeholder: 'cixingnansheng',
+        required: true,
+        description: 'The voice to use for speech synthesis',
       },
       {
-        displayName: 'Speed',
-        name: 'speed',
-        type: 'number',
-        default: 1,
-        typeOptions: {
-          minValue: 0.5,
-          maxValue: 2,
-          numberPrecision: 2,
-        },
-      },
-      {
-        displayName: 'Volume',
-        name: 'volume',
-        type: 'number',
-        default: 1,
-        typeOptions: {
-          minValue: 0.1,
-          maxValue: 2,
-          numberPrecision: 2,
-        },
-      },
-      {
-        displayName: 'Response MIME Type',
-        name: 'responseMimeType',
+        displayName: 'Model',
+        name: 'model',
         type: 'options',
         options: [
-          { name: 'MP3 (audio/mpeg)', value: 'audio/mpeg' },
-          { name: 'WAV (audio/wav)', value: 'audio/wav' },
-          { name: 'OGG (audio/ogg)', value: 'audio/ogg' },
-          { name: 'WEBM (audio/webm)', value: 'audio/webm' },
-          { name: 'FLAC (audio/flac)', value: 'audio/flac' },
-          { name: 'Other (custom)', value: 'custom' },
+          { name: 'step-tts-2', value: 'step-tts-2' },
         ],
-        default: 'audio/mpeg',
-      },
-      {
-        displayName: 'Custom Response MIME Type',
-        name: 'customResponseMimeType',
-        type: 'string',
-        default: '',
-        placeholder: 'audio/mpeg',
-        displayOptions: {
-          show: {
-            responseMimeType: ['custom'],
-          },
-        },
-      },
-      {
-        displayName: 'Binary Property',
-        name: 'binaryPropertyName',
-        type: 'string',
-        default: 'audio',
+        default: 'step-tts-2',
         required: true,
+        description: 'The TTS model to use',
       },
       {
-        displayName: 'File Name',
-        name: 'fileName',
-        type: 'string',
-        default: 'stepfun-tts',
+        displayName: 'Output Format',
+        name: 'outputFormat',
+        type: 'options',
+        options: [
+          { name: 'MP3', value: 'mp3' },
+          { name: 'AAC', value: 'aac' },
+          { name: 'FLAC', value: 'flac' },
+          { name: 'WAV', value: 'wav' },
+          { name: 'PCM', value: 'pcm' },
+          { name: 'Opus', value: 'opus' },
+        ],
+        default: 'mp3',
+        description: 'The audio format for the output file',
       },
     ],
+  };
+
+  methods = {
+    loadOptions: {
+      async getVoices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+        const credentials = await this.getCredentials('stepFunApi');
+        const baseUrl = (credentials.baseUrl as string).replace(/\/+$/, '');
+        const apiKey = credentials.apiKey as string;
+
+        try {
+          const response = await this.helpers.httpRequest({
+            method: 'GET',
+            url: `${baseUrl}/audio/system_voices?model=step-tts-mini`,
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+            },
+          });
+
+          const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+          const voices: IDataObject[] = Array.isArray(parsed)
+            ? parsed
+            : (parsed.data ?? parsed.voices ?? []);
+
+          return voices.map((voice: IDataObject) => ({
+            name: (voice.name ?? voice.display_name ?? voice.id ?? '') as string,
+            value: (voice.id ?? voice.voice_id ?? voice.name ?? '') as string,
+          }));
+        } catch {
+          return [];
+        }
+      },
+    },
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -163,32 +154,22 @@ export class StepFunTts implements INodeType {
           throw new NodeOperationError(this.getNode(), 'Text is required', { itemIndex });
         }
 
-        const endpointPath = this.getNodeParameter('endpointPath', itemIndex) as string;
-        const model = this.getNodeParameter('model', itemIndex) as string;
         const voice = this.getNodeParameter('voice', itemIndex) as string;
-        const speed = this.getNodeParameter('speed', itemIndex) as number;
-        const volume = this.getNodeParameter('volume', itemIndex) as number;
-        const responseMimeTypeRaw = this.getNodeParameter('responseMimeType', itemIndex) as string;
-        const customResponseMimeType = this.getNodeParameter('customResponseMimeType', itemIndex) as string;
-        const responseMimeType =
-          responseMimeTypeRaw === 'custom' ? (customResponseMimeType || 'audio/mpeg') : responseMimeTypeRaw;
-        const binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex) as string;
-        const fileNameBase = this.getNodeParameter('fileName', itemIndex) as string;
+        const model = this.getNodeParameter('model', itemIndex) as string;
+        const outputFormat = this.getNodeParameter('outputFormat', itemIndex) as string;
 
-        const url = `${baseUrl}${endpointPath.startsWith('/') ? '' : '/'}${endpointPath}`;
+        const formatInfo = OUTPUT_FORMAT_MAP[outputFormat] ?? OUTPUT_FORMAT_MAP.mp3;
 
         const body: IDataObject = {
           model,
           input: text,
-          speed,
-          volume,
-          response_format: responseMimeType,
+          voice,
+          response_format: outputFormat,
         };
-        if (voice) body.voice = voice;
 
         const requestOptions: IHttpRequestOptions = {
           method: 'POST',
-          url,
+          url: `${baseUrl}/audio/speech`,
           body,
           json: true,
           encoding: 'arraybuffer',
@@ -201,22 +182,22 @@ export class StepFunTts implements INodeType {
         )) as ArrayBuffer;
 
         const audioBuffer = Buffer.from(audioArrayBuffer);
-
-        const ext = getFileExtensionFromMimeType(responseMimeType);
-        const fileName = ext ? `${fileNameBase}.${ext}` : fileNameBase;
-        const binaryData = await this.helpers.prepareBinaryData(audioBuffer, fileName, responseMimeType);
+        const fileName = `stepfun-tts.${formatInfo.ext}`;
+        const binaryData = await this.helpers.prepareBinaryData(
+          audioBuffer,
+          fileName,
+          formatInfo.mimeType,
+        );
 
         returnData.push({
           json: {
-            model,
+            text,
             voice,
-            speed,
-            volume,
-            mimeType: responseMimeType,
-            fileName,
+            model,
+            outputFormat,
           },
           binary: {
-            [binaryPropertyName]: binaryData,
+            audio: binaryData,
           },
           pairedItem: { item: itemIndex },
         });
