@@ -10,7 +10,7 @@ export class StepFunApi implements ICredentialType {
   name = 'stepFunApi';
   displayName = 'Stepfun AI API Key';
   documentationUrl = 'https://platform.stepfun.ai/';
-  icon: Icon = 'file:stepfun.svg';
+  icon: Icon = 'file:stepfun.png';
   supportedNodes = ['stepFunTts'];
 
   authenticate: IAuthenticateGeneric = {
@@ -46,7 +46,7 @@ export class StepFunApi implements ICredentialType {
       displayName: 'Base URL',
       name: 'baseUrl',
       type: 'string',
-      default: 'https://api.stepfun.com/v1',
+      default: 'https://api.stepfun.ai/v1',
       required: true,
     },
   ];

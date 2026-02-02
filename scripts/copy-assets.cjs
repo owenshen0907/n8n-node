@@ -42,6 +42,11 @@ async function main() {
   await copyDirRecursive(path.join(root, 'icons'), path.join(dist, 'icons'));
   await copyFileIfExists(path.join(root, 'README.md'), path.join(dist, 'README.md'));
   await copyDirRecursive(path.join(root, 'templates'), path.join(dist, 'templates'));
+
+  // Copy icon to node and credential directories so n8n can resolve file:stepfun.png
+  const iconSrc = path.join(root, 'icons', 'stepfun.png');
+  await copyFileIfExists(iconSrc, path.join(dist, 'nodes', 'StepFunTts', 'stepfun.png'));
+  await copyFileIfExists(iconSrc, path.join(dist, 'credentials', 'stepfun.png'));
 }
 
 main().catch((error) => {

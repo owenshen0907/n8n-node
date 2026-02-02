@@ -11,6 +11,16 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
+const DEFAULT_VOICES: Array<{ name: string; value: string }> = [
+  { name: 'Lively Girl (English)', value: 'lively-girl' },
+  { name: 'Vibrant Youth (English)', value: 'vibrant-youth' },
+  { name: 'Soft-spoken Gentleman (English)', value: 'soft-spoken-gentleman' },
+  { name: 'Magnetic-voiced Male (English)', value: 'magnetic-voiced-male' },
+  { name: 'Gentle Lady (Chinese)', value: 'elegantgentle-female' },
+  { name: 'Breezy Girl (Chinese)', value: 'livelybreezy-female' },
+  { name: 'Confident Gentleman (Chinese)', value: 'zixinnansheng' },
+];
+
 const OUTPUT_FORMAT_MAP: Record<string, { mimeType: string; ext: string }> = {
   mp3: { mimeType: 'audio/mpeg', ext: 'mp3' },
   aac: { mimeType: 'audio/aac', ext: 'aac' },
@@ -29,7 +39,7 @@ export class StepFunTts implements INodeType {
     description: 'Convert Text Into Speech using Stepfun.ai\'s Model (TTS)',
     subtitle: '={{$parameter["model"]}}',
     documentationUrl: 'https://platform.stepfun.ai/',
-    icon: 'file:stepfun.svg',
+    icon: 'file:stepfun.png',
     codex: {
       categories: ['AI', 'Audio'],
       subcategories: {
@@ -112,13 +122,13 @@ export class StepFunTts implements INodeType {
     loadOptions: {
       async getVoices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
         const credentials = await this.getCredentials('stepFunApi');
-        const baseUrl = (credentials.baseUrl as string).replace(/\/+$/, '');
         const apiKey = credentials.apiKey as string;
+        const baseUrl = (credentials.baseUrl as string).replace(/\/+$/, '');
 
         try {
           const response = await this.helpers.httpRequest({
             method: 'GET',
-            url: `${baseUrl}/audio/system_voices?model=step-tts-mini`,
+            url: `${baseUrl}/audio/system_voices?model=step-tts-2`,
             headers: {
               Authorization: `Bearer ${apiKey}`,
             },
@@ -129,13 +139,17 @@ export class StepFunTts implements INodeType {
             ? parsed
             : (parsed.data ?? parsed.voices ?? []);
 
-          return voices.map((voice: IDataObject) => ({
-            name: (voice.name ?? voice.display_name ?? voice.id ?? '') as string,
-            value: (voice.id ?? voice.voice_id ?? voice.name ?? '') as string,
-          }));
+          if (voices.length) {
+            return voices.map((voice: IDataObject) => ({
+              name: (voice.name ?? voice.display_name ?? voice.id ?? '') as string,
+              value: (voice.id ?? voice.voice_id ?? voice.name ?? '') as string,
+            }));
+          }
         } catch {
-          return [];
+          // API unavailable, fall through to defaults
         }
+
+        return DEFAULT_VOICES;
       },
     },
   };
